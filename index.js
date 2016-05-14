@@ -111,16 +111,29 @@ app.intent('RandomCrimeIntent',{
 								var speech = "On " + randomArrest.Date + ", " + randomPlayer.Name;
 								
 								if(positions[randomArrest.Position]) {
-									speech += ", a " + positions[randomArrest.Position];
-									if(!teams[randomArrest.Team]) {
+									if(randomArrest.Team === "free") {
+										speech += ", a free agent " + positions[randomArrest.Position];
 										speech += ", ";
 									}
+									else {
+										speech += ", a " + positions[randomArrest.Position];
+										if(!teams[randomArrest.Team]) {
+											speech += ", ";
+										}
+									}
+									
 								}
 								if(teams[randomArrest.Team]) {
 									speech += " of the " + teams[randomArrest.Team];
 									speech += ", ";
 								}
-								speech += " was " + randomArrest.Encounter + " for " + randomArrest.Category + "... " + randomArrest.Description;
+								speech += " was " + randomArrest.Encounter + " for " + randomArrest.Category;
+								if(randomArrest.Description) {
+									speech += "... " + randomArrest.Description;
+								}
+								else {
+									speech += ".";
+								}
 							
 							}
 							res.say(speech);
