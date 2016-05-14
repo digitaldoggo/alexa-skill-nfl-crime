@@ -1,0 +1,127 @@
+var alexa = require('alexa-app');
+var http = require('http');
+var strftime = require ('strftime');
+var random = require ('./random');
+
+var teams = require('./teams');
+var positions = require('./positions');
+
+// Allow this module to be reloaded by hotswap when changed
+module.change_code = 1;
+
+// Define an alexa-app
+var app = new alexa.app('football-crime');
+
+app.messages.NO_INTENT_FOUND = "Sorry, I didn't understand the request.";
+
+app.launch(function(req,res) {
+	var prompt = "Would you like to get a random NFL player crime fact?";
+	res.say(prompt).reprompt(prompt).shouldEndSession(false);
+});
+
+app.pre = function(request,response,type) {
+	console.log("Pre method reached with type: " + type);
+	
+	// TODO: update applicatoinId
+    if (request.sessionDetails.application.applicationId!="amzn1.echo-sdk-ams.app.4a97dc92-2470-4080-a7bb-2667f3eb84f2") {
+        // Fail ungracefully
+        response.fail("Invalid applicationId");
+    }
+};
+
+app.post = function(request,response,type,exception) {
+	console.log("Post method reached");
+	
+    // Always turn an exception into a successful response
+	if(exception != null) {
+    	response.clear().say("An error occurred: "+exception).send();
+	}
+};
+
+app.error = function(exception, request, response) {
+	console.log("Error encountered");
+	console.log(exception);
+    response.say("Sorry, an error occurred.");
+};
+
+app.intent('RandomCrimeIntent',{
+		"slots":{"ANSWER":"LITERAL"}
+		,"utterances":[
+			"{yes|no|ANSWER}",
+			"{for|to get} a {random crime|crime}",
+			"to tell me a {random crime|crime}"
+		]
+	},
+	function(req,res) {
+		console.log("RandomCrimeIntent entered");
+		
+		var answer = req.slot('ANSWER');
+		
+		if((typeof answer === 'undefined' && answer == null) || answer === "yes") {
+		
+			var options = {
+				host: 'nflarrest.com',
+				path: '/api/v1/player'
+			};
+
+			http.request(options, function(response) {
+				var playerData = '';
+				
+				response.on('data', function (chunk) {
+					playerData += chunk;
+				});
+
+				//the whole response has been recieved, so we just print it out here
+				response.on('end', function () {
+					playerData = JSON.parse(playerData);
+					
+					// get random player name
+					var randomPlayer = playerData[random.getRandomInt(0, playerData.length - 1)];
+					
+					console.log(randomPlayer.Name);
+					
+					var options = {
+						host: 'nflarrest.com',
+						path: '/api/v1/player/arrests/' + encodeURI(randomPlayer.Name)
+					};
+
+					http.request(options, function(response) {
+						var arrestData = '';
+						
+						response.on('data', function (chunk) {
+							arrestData += chunk;
+						});
+
+						//the whole response has been recieved, so we just print it out here
+						response.on('end', function () {
+							arrestData = JSON.parse(arrestData);
+							
+							// get random arrest record
+							var randomArrest = arrestData[random.getRandomInt(0, arrestData.length - 1)];
+							
+							console.log(JSON.stringify(randomArrest));
+							
+							randomArrest.Date = strftime("%B %d, %Y", new Date(randomArrest.Date));
+							
+							// var speech = randomPlayer.Name + ", a " + positions[randomArrest.Position] + " of the " + teams[randomArrest.Team] + " has been arrested " + randomPlayer.arrest_count + " times.";
+							var speech = "On " + randomArrest.Date + ", " + randomPlayer.Name + ", a " + positions[randomArrest.Position] + " of the " + teams[randomArrest.Team] + ", was " + randomArrest.Encounter +
+											" for " + randomArrest.Category + "... " + randomArrest.Description;
+							
+							res.say(speech);
+							res.card("NFL Crime", speech);
+							res.send();
+						});
+					}).end();
+				});
+			}).end();
+			
+			return false;
+		}
+	}
+);
+
+// Use for deploying to AWS Lambda
+module.exports.handler = app.lambda();
+
+// Use for local testing
+//module.exports = app;

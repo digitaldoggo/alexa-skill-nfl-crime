@@ -1,0 +1,16 @@
+{
+  "name": "alexa-skill-nfl-crime",
+  "version": "1.0.0",
+  "description": "Alexa skill to get information about nfl arrests",
+  "main": "index.js",
+  "author": "k3yb0ardn1nja",
+  "license": "MIT",
+  "alexa": {
+    "applicationId":"amzn1.echo-sdk-ams.app.4a97dc92-2470-4080-a7bb-2667f3eb84f2"
+  },
+  "dependencies": {
+    "alexa-app": "^2.1.0",
+	"http": "^0.0.0",
+	"strftime": "^0.9.2"
+  }
+}

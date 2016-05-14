@@ -1,0 +1,14 @@
+{
+  "intents": [
+    {
+      "intent": "RandomCrimeIntent",
+      "slots": [
+        {
+          "name": "ANSWER",
+          "type": "LITERAL"
+        }
+      ]
+    },
+    {"intent": "AMAZON.CancelIntent"}
+  ]
+}

@@ -1,0 +1,8 @@
+RandomCrimeIntent	{yes|ANSWER}
+RandomCrimeIntent	{no|ANSWER}
+RandomCrimeIntent	for a random crime
+RandomCrimeIntent	to get a random crime
+RandomCrimeIntent	for a crime
+RandomCrimeIntent	to get a crime
+RandomCrimeIntent	to tell me a random crime
+RandomCrimeIntent	to tell me a crime
