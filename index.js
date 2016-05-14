@@ -101,12 +101,28 @@ app.intent('RandomCrimeIntent',{
 							
 							console.log(JSON.stringify(randomArrest));
 							
-							randomArrest.Date = strftime("%B %d, %Y", new Date(randomArrest.Date));
+							if(randomArrest.Date && randomPlayer.Name) {
+								
+								var dateToFormat = new Date(randomArrest.Date);
+								var day = dateToFormat.getDate(); // prevent leading zero
+								randomArrest.Date = strftime("%B " + day +", %Y", dateToFormat);
 							
-							// var speech = randomPlayer.Name + ", a " + positions[randomArrest.Position] + " of the " + teams[randomArrest.Team] + " has been arrested " + randomPlayer.arrest_count + " times.";
-							var speech = "On " + randomArrest.Date + ", " + randomPlayer.Name + ", a " + positions[randomArrest.Position] + " of the " + teams[randomArrest.Team] + ", was " + randomArrest.Encounter +
-											" for " + randomArrest.Category + "... " + randomArrest.Description;
+								// TODO: remove unnecessary commas to prevent strange breaks
+								var speech = "On " + randomArrest.Date + ", " + randomPlayer.Name;
+								
+								if(positions[randomArrest.Position]) {
+									speech += ", a " + positions[randomArrest.Position];
+									if(!teams[randomArrest.Team]) {
+										speech += ", ";
+									}
+								}
+								if(teams[randomArrest.Team]) {
+									speech += " of the " + teams[randomArrest.Team];
+									speech += ", ";
+								}
+								speech += " was " + randomArrest.Encounter + " for " + randomArrest.Category + "... " + randomArrest.Description;
 							
+							}
 							res.say(speech);
 							res.card("NFL Crime", speech);
 							res.send();
@@ -121,7 +137,7 @@ app.intent('RandomCrimeIntent',{
 );
 
 // Use for deploying to AWS Lambda
-module.exports.handler = app.lambda();
+//module.exports.handler = app.lambda();
 
 // Use for local testing
-//module.exports = app;
+module.exports = app;
