@@ -137,7 +137,7 @@ app.intent('RandomCrimeIntent',{
 							
 							}
 							res.say(speech);
-							res.card("NFL Crime", speech);
+							res.card("Random Crime Record", speech);
 							res.send();
 						});
 					}).end();
